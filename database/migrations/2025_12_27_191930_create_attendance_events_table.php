@@ -13,13 +13,23 @@ public function up(): void
 {
     Schema::create('attendance_events', function (Blueprint $table) {
         $table->id();
-        $table->unsignedBigInteger('worker_id');
+
+        $table->foreignId('business_id')
+            ->constrained()
+            ->cascadeOnDelete();
+
+        $table->foreignId('employee_id')
+            ->constrained()
+            ->cascadeOnDelete();
+
         $table->dateTime('event_time');
         $table->enum('type', ['IN', 'OUT']);
+
         $table->timestamps();
 
-        $table->unique(['worker_id', 'event_time']);
+        $table->unique(['employee_id', 'event_time']);
     });
+
 }
 
 

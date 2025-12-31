@@ -2,49 +2,78 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreAttendanceEventRequest;
+use Illuminate\Http\Request;
 use App\Models\AttendanceEvent;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
+
 
 class AttendanceController extends Controller
 {
-    public function store(StoreAttendanceEventRequest $request)
+    public function clockIn(Request $request)
     {
-        $data = $request->validated();
+        $employee = $request->user()->employee;
 
-        $exists = AttendanceEvent::where('worker_id', $data['workerId'])
-            ->where('event_time', $data['event_time'])
-            ->exists();
+        if (!$employee) {
+            return response()->json(['message' => 'Employee not found'], 422);
+        }
 
-        if ($exists) {
-            return response()->json([
-                'message' => 'Duplicate event'
-            ], 409);
+        if ($employee->isClockedIn()) {
+            return response()->json(['message' => 'Already clocked in'], 422);
+        }
+
+
+        AttendanceEvent::create([
+            'business_id' => $employee->business_id,
+            'employee_id' => $employee->id,
+            'type' => 'IN',
+            'event_time' => now(),
+        ]);
+
+        return response()->json(['message' => 'Clocked in']);
+    }
+
+
+    public function clockOut(Request $request)
+    {
+        $employee = $request->user()->employee;
+
+        if (!$employee) {
+            return response()->json(['message' => 'Employee not found'], 422);
+        }
+
+        $ins = AttendanceEvent::where('employee_id', $employee->id)
+            ->where('type', 'IN')
+            ->count();
+
+        $outs = AttendanceEvent::where('employee_id', $employee->id)
+            ->where('type', 'OUT')
+            ->count();
+
+        if ($outs >= $ins) {
+            return response()->json(['message' => 'No open session to clock out'], 422);
         }
 
         AttendanceEvent::create([
-            'worker_id'   => $data['workerId'],
-            'event_time'  => $data['event_time'],
-            'type'        => $data['type'],
+            'business_id' => $employee->business_id,
+            'employee_id' => $employee->id,
+            'type' => 'OUT',
+            'event_time' => now(),
         ]);
 
-        return response()->json([
-            'message' => 'Event stored successfully'
-        ], 201);
+        return response()->json(['message' => 'Clocked out']);
     }
 
-    public function report(int $workerId, Request $request)
+    public function dailyReport(Request $request)
     {
-        $date = $request->query('date');
+        $employee = $request->user()->employee;
 
-        if (!$date) {
-            return response()->json([
-                'message' => 'date query parameter is required'
-            ], 422);
+        if (!$employee) {
+            return response()->json(['message' => 'Employee not found'], 422);
         }
 
-        $events = AttendanceEvent::where('worker_id', $workerId)
+        $date = $request->query('date', now()->toDateString());
+
+        $events = AttendanceEvent::where('employee_id', $employee->id)
             ->whereDate('event_time', $date)
             ->orderBy('event_time')
             ->get();
@@ -58,29 +87,30 @@ class AttendanceController extends Controller
             if ($current->type === 'IN') {
                 $next = $events[$i + 1] ?? null;
 
-                if (!$next || $next->type !== 'OUT') {
-                    $errors[] = 'Missing OUT after IN at ' . $current->event_time;
+                if (! $next || $next->type !== 'OUT') {
+                    $errors[] = "Missing OUT after IN at {$current->event_time}";
                     continue;
                 }
 
                 $in  = Carbon::parse($current->event_time);
                 $out = Carbon::parse($next->event_time);
 
-                $totalMinutes += max(0, $in->diffInMinutes($out));
-
-                $i++;
+                $totalMinutes += $in->diffInMinutes($out);
+                $i++; // skip next (OUT)
             }
         }
 
         return response()->json([
-            'workerId'   => $workerId,
-            'date'       => $date,
-            'totalHours' => sprintf('%02d:%02d', intdiv($totalMinutes, 60), $totalMinutes % 60),
-            'entries'    => $events->map(fn ($e) => [
+            'date' => $date,
+            'total_minutes' => $totalMinutes,
+            'total_hours' => sprintf('%02d:%02d', intdiv($totalMinutes, 60), $totalMinutes % 60),
+            'events' => $events->map(fn ($e) => [
                 'type' => $e->type,
                 'time' => Carbon::parse($e->event_time)->format('H:i'),
             ]),
             'errors' => $errors,
         ]);
-    }
+}
+
+
 }
