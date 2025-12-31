@@ -83,16 +83,51 @@ async function loadDailyReport() {
         return;
     }
 
-    let html = `<div class="text-sm text-blue-700 font-bold mb-3">Total Hours: ${data.total_hours}</div>`;
+    let html = `
+    <div class="font-bold mb-3">
+        Total Hours: ${data.total_hours}
+    </div>
 
-    html += `<ul class="mb-2">`;
-    data.events.forEach(e => {
-        html += `<li>${e.type} - ${e.time}</li>`;
-    });
-    html += `</ul>`;
+    <table class="w-full border border-gray-300 text-center text-sm">
+        <thead class="bg-gray-100">
+            <tr>
+                <th class="border px-2 py-1">IN</th>
+                <th class="border px-2 py-1">OUT</th>
+            </tr>
+        </thead>
+        <tbody>
+    `;
+
+    let isFirstEventIn = false;
+    for (let i = 0; i < data.events.length; i += 2) {
+        const inEvent  = data.events[i];
+        const outEvent = data.events[i + 1];
+
+        isFirstEventIn = inEvent?.type === 'IN';
+        if(!isFirstEventIn){
+            i -= 1;
+        }else{
+            html += `
+            <tr>
+                <td class="border px-2 py-1">
+                    ${inEvent?.type === 'IN' ? inEvent.time : ''}
+                </td>
+                <td class="border px-2 py-1">
+                    ${outEvent?.type === 'OUT' ? outEvent.time : ''}
+                </td>
+            </tr>
+            `;
+        }
+        
+    }
+
+    html += `
+            </tbody>
+        </table>
+    `;
 
     if (data.errors.length) {
-        html += `<div class="text-red-600">`;
+        html += `<div class="mt-2 text-red-600 text-xs">`;
         data.errors.forEach(err => {
             html += `<div>${err}</div>`;
         });
@@ -100,6 +135,7 @@ async function loadDailyReport() {
     }
 
     document.getElementById('dailyReport').innerHTML = html;
+
 }
 
 /**

@@ -30,15 +30,7 @@
         דוח יומי
     </button>
 
-    <!-- Daily report (collapsed by default) -->
-    <div id="dailyReportWrapper" class="mt-4 hidden text-right">
 
-        <label class="block text-sm mb-1">תאריך</label>
-        <input type="date" id="reportDate"
-               class="border rounded px-2 py-1 w-full mb-2"
-               value="{{ now()->toDateString() }}">
-
-    </div>
 
     <form method="POST" action="/logout" class="mt-6">
         @csrf
@@ -49,7 +41,20 @@
 
 </div>
 
-<div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4 text-center">
+<div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4 text-center w-auto max-w-full sm:min-w-[400px]" id="dailyReportWrapper">
+        <!-- Daily report (collapsed by default) -->
+    <div class="mt-4 hidden text-right">
+
+        <label class="block text-sm mb-1">תאריך</label>
+        <input type="date" id="reportDate"
+               class="border rounded px-2 py-1 w-full mb-2"
+               value="{{ now()->toDateString() }}">
+
+    </div>
+    <button onclick="loadDailyReport()"
+        class="w-full bg-blue-500 text-white py-2 rounded mb-2">
+        רפרש דוח
+    </button>
     <div id="dailyReport" class="text-sm text-gray-800 p-5"></div>
 </div>
 
