@@ -26,9 +26,7 @@ async function clock(type) {
     loadDailyReport?.();
 }
 
-/**
- * Load current attendance status (clocked in / out)
- */
+
 /**
  * Load current attendance status and sync UI
  */
@@ -51,7 +49,6 @@ async function loadStatus() {
 }
 
 
-
 /**
  * Initial page load
  */
@@ -59,7 +56,6 @@ document.addEventListener('DOMContentLoaded', () => {
     loadStatus();
     loadDailyReport();
 });
-
 
 
 /**
@@ -137,6 +133,7 @@ async function loadDailyReport() {
     document.getElementById('dailyReport').innerHTML = html;
 
 }
+
 
 /**
  * Initial page load logic

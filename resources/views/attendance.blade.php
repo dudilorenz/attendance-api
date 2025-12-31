@@ -31,7 +31,6 @@
     </button>
 
 
-
     <form method="POST" action="/logout" class="mt-6">
         @csrf
         <button class="w-full bg-gray-700 text-white py-2 rounded">
