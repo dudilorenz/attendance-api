@@ -3,7 +3,7 @@
 A Laravel-based attendance tracking system with session-based login (WEB) and token-based API (Sanctum).
 Employees can clock IN / OUT, view daily attendance reports, and calculate total working hours.
 
-##Features
+## Features
 
 - Employee login (email + password)
 - Clock IN / OUT actions
@@ -14,7 +14,7 @@ Employees can clock IN / OUT, view daily attendance reports, and calculate total
 - API protected with Laravel Sanctum
 - Session-based WEB auth + Bearer token for API calls
 
-##Tech Stack
+## Tech Stack
 - PHP 8.2+
 - Laravel 11
 - MySQL
@@ -22,26 +22,26 @@ Employees can clock IN / OUT, view daily attendance reports, and calculate total
 - Tailwind CSS
 - Composer
 
-##Installation
+## Installation
 - git clone https://github.com/dudilorenz/attendance-api.git
 - cd attendance-api
 - composer install
 - cp .env.example .env
 - php artisan key:generate
 
-##Environment Configuration (.env)
+## Environment Configuration (.env)
 APP_URL=http://127.0.0.1:8000
 
 DB_DATABASE=attendance_db
 DB_USERNAME=root
 DB_PASSWORD=
 
-##Database Setup
+## Database Setup
 ```bash
 php artisan migrate
 ```
 
-###This will create:
+### This will create:
 - users
 - businesses
 - employees
@@ -50,14 +50,14 @@ php artisan migrate
 - sessions
 
 #Create Test Data (REQUIRED)
-##1. Create Business
+## 1. Create Business
 `php artisan tinker`
 
 $business = \App\Models\Business::create([
     'name' => 'Demo Business'
 ]);
 
-##2. Create User (Employee)
+## 2. Create User (Employee)
 ```bash
 $user = \App\Models\User::create([
     'business_id' => $business->id,
@@ -68,7 +68,7 @@ $user = \App\Models\User::create([
 ]);
 ```
 
-##3. Create Employee Profile (CRITICAL)
+## 3. Create Employee Profile (CRITICAL)
 ```bash
 \App\Models\Employee::create([
     'business_id' => $business->id,
@@ -81,26 +81,26 @@ $user = \App\Models\User::create([
 
 **⚠️ Without an Employee record, IN / OUT will fail.**
 
-##Run the Server
+## Run the Server
 ```bash
 php artisan serve
 ```
 
-###Server URL:
+### Server URL:
 http://127.0.0.1:8000
 
-##Authentication Flow
+## Authentication Flow
 1. Login (WEB)
 2. GET  /login
 3. POST /login
 
 
-##Credentials:
+## Credentials:
 *Email:*    test@test.com
 *Password:* secret
 
 
-##After login:
+## After login:
 
 1. User is authenticated via session
 
@@ -110,21 +110,21 @@ http://127.0.0.1:8000
 
 4. User is redirected to /attendance
 
-##UI Pages
-###Description
-###/login - Login page
-###/attendance - Attendance UI (protected)
+## UI Pages
+### Description
+### /login - Login page
+### /attendance - Attendance UI (protected)
 
-##API Endpoints (Sanctum Protected)
-###Clock IN
-- POST /api/attendance/in
+## API Endpoints (Sanctum Protected)
+### Clock IN
+- POST /attendance/in
 - Authorization: Bearer <token>
 
-###Clock OUT
+### Clock OUT
 - POST /api/attendance/out
 - Authorization: Bearer <token>
 
-###Attendance Status
+### Attendance Status
 - GET /api/attendance/status
 - Authorization: Bearer <token>
 
@@ -134,7 +134,7 @@ Response:
   "clocked_in": true
 }
 
-##Daily Report
+## Daily Report
 GET /api/attendance/daily?date=YYYY-MM-DD
 Authorization: Bearer <token>
 
@@ -152,7 +152,7 @@ Response:
 }
 ```
 
-##Business Rules
+## Business Rules
 
 - IN must be followed by OUT
 - Multiple IN without OUT - return error - button disabled
